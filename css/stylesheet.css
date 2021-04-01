@@ -1,0 +1,66 @@
+html.* {
+	font-family: "Garamond", Times, serif; 
+	font-size: 12pt;
+}
+
+h3 {
+    text-align: left;
+    padding: 0px;
+    margin: 0px;
+}
+
+
+label {
+/*	text-align: center;*/
+  	color: black;
+}
+
+#sequence_input {
+	text-align: left;
+	width: 500px;
+}
+
+td.dictCell {
+	vertical-align: top;
+	border: 1px solid black;
+	padding: 0;
+}
+
+table.dictTable {
+    border-style: solid;
+    border-width: 1px;
+}
+
+input.dictTable {
+	width: 40px;
+	font-size: 8.5pt;
+}
+
+th.dictTable {
+	font-weight: bold;
+	text-align: center;
+}
+
+td.dictTabe {
+	padding: 0px
+}
+
+table.cyk_table_class {
+}
+
+td.cyk_table_class {
+    border-style: solid;
+    border-width: 1px;
+}
+label.cyk_table_class {
+    background-color: lightgrey;
+    color: black;
+    padding: 1px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.caret {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+}
