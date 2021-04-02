@@ -64,3 +64,35 @@ label.cyk_table_class {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
 }
+
+table.editable_table {
+	table-layout: fixed;
+  	width: 520px;
+	border: 1px solid black; 
+  	border-collapse: collapse;
+}
+
+th.editable_rule {
+	width: 400px;
+	font-weight: bold;
+//	border: 1px solid black; 
+//  	border-collapse: collapse;
+}
+
+th.editable_score {
+	width: 100px
+	font-weight: bold;
+//	border: 1px solid black; 
+//  	border-collapse: collapse;
+}
+
+.editable_rule, .editable_score, .delete_cell {
+	border: 1px solid black; 
+  	border-collapse: collapse;
+  	padding-left: 5px;
+}
+
+.delete_cell {
+	user-select: none;
+	text-align: center;
+}

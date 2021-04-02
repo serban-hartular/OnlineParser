@@ -1,5 +1,36 @@
 // "use strict";
 
+        
+        function onParse() {
+            toggleGrammarTableText(false); //this synchronizes the contents of grammar_table and grammar_textarea
+            grammar_str = $('#grammar_textarea').val()
+            if(grammar_str.charAt(grammar_str.length-1) != '\n')
+                grammar_str = grammar_str + '\n'
+            
+            result = rule_parser.parse(grammar_str)
+            grammar = result.rule_list
+            errors = result.error_list
+            if(errors.length > 0) {
+                console.log("Errors\n")
+                console.log(errors.join('\n'))
+                result.error_list.length = 0
+                return
+            }
+            
+            word_list = []
+            //fetch dicts, jsonify and send them
+            $('#' + tag_table_id).find('table.dictTable').each(function() {
+                dict = fetchDictTable(this, "form")
+                word_list.push(dict)
+            })
+
+            obj = {'grammar': grammar, 'word_list':word_list}
+            if(grammar.length == 0 || word_list.length == 0) {
+                console.log('No grammar, or no word_list')
+                return
+            }
+            $.post("http://localhost:8000/cgi-bin/reply.py", JSON.stringify(obj), processParse)
+        }
 
 function createDictTable(dict, parentID, header = null, set_stuff = function(item){}) {
     var property;
@@ -143,4 +174,80 @@ function generateTreeView(node_index, $parent, deprel = '') {
         }
     }
     return $li
+}
+
+function finishedEditingLine(event) {
+	if(event.type == 'keydown' && event.keyCode == 13) { //keyCode 13 is Enter
+            event.preventDefault();
+            this.blur()
+	} else if (event.type == 'focusout') {
+		console.log($(this).text() + ', Do shit!')
+	}
+}
+
+function grammarStrFromTable() {
+	$table = $('#rule_table')
+	$rows = $('tr.rule_row')
+	let grammar_str = ''
+	for(i = 0; i < $rows.length; i++) {
+		$row = $($rows[i])
+		cell = $row.find('.editable_rule')[0]
+		grammar_str = grammar_str + $(cell).text() + '\n'
+	}
+	console.log(grammar_str)
+	return grammar_str;
+}
+
+function addNewRule(event) {
+	$table = $('#rule_table')
+	$rows = $table.find('tr')
+	last_row = $rows[$rows.length - 1]
+	$copy = $(last_row).clone(true) // clone event handlers as well
+	//$copy.find('td').on('keydown focusout', finishedEditingLine) // add edit behaviour to cells
+	$(last_row).show()
+	$(last_row).addClass('rule_row')
+	$table.append($copy)
+	return $(last_row)
+}
+
+function deleteRule(event) {
+	event.target.parentNode.remove() //should remove row
+}
+
+function onFilterInput(event) {
+	filter_string = $('#filter').val()
+//	console.log(filter_string)
+	$rows = $('tr.rule_row')
+	for(i = 0; i < $rows.length; i++) {
+		$row = $($rows[i])
+		cell = $row.find('.editable_rule')[0]
+		if(filter_string == '' || $(cell).text().startsWith(filter_string)) {
+			$row.show()
+		} else {
+			$row.hide()
+		}
+	}
+}
+
+function toggleGrammarTableText(toggle_visibility = true) {
+	$table = $('#grammar_table_div')
+	$textarea = $('#grammar_textarea')
+	//synchronize data between the two
+	if($textarea.is(":hidden")) { //populate textarea with grammar string
+		$textarea.val(grammarStrFromTable())
+	} else { //create table from text
+		$('tr.rule_row').remove()
+		let grammar_str = $textarea.val()
+		let lines = grammar_str.split(/[\r\n]+/)
+		console.log(lines)
+		for(i = 0; i < lines.length; i++) {
+			if(lines[i] == '') continue;
+			$row = addNewRule(null)
+			$row.find('.editable_rule').text(lines[i])
+		}
+	}
+	if(toggle_visibility) {
+		$table.toggle()
+		$textarea.toggle()
+	}
 }

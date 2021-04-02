@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Toy Grammar</title>
+    <link rel="stylesheet" href="css/stylesheet.css">
+    <link rel="icon" type="image/png" href="img/favicon.png"/>
+    <meta charset="utf-8">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src='scripts/rule_parser.js'></script>
+    <script src="scripts/page_manager.js"></script>
+    <script>
+        
+        var tag_table_id = "tag_table"
+        function sendText() {
+            text = document.getElementById("sequence_input").value
+            $.get("http://localhost:8080/?q=" + encodeURIComponent(text),
+                  function(data, status) {
+                    var list
+                    try {
+                        list = JSON.parse(data)
+                    }
+                    catch {
+                        console.log('error json parsing \"' + data + '\"')
+                        return
+                    }
+                    
+                    $('#' + tag_table_id).remove() // remove tag table
+                    var $tag_table = $(`<table id=${ tag_table_id }><tr>`).appendTo($('#tagger_div'))
+                    for(i = 0; i < list.length; i++) {
+                        $cell = $('<td>').appendTo($tag_table)
+                        var dict = list[i]
+                        header = dict['form']
+                        delete dict.form
+                        createDictTable(dict, $cell, header, function(item){item.addClass('dictTable')})
+                    }
+            })
+          
+        }
+        
+        function onParse() {
+            grammar_str = $('#grammar_textarea').val()
+            if(grammar_str.charAt(grammar_str.length-1) != '\n')
+                grammar_str = grammar_str + '\n'
+            
+            result = rule_parser.parse(grammar_str)
+            grammar = result.rule_list
+            errors = result.error_list
+            if(errors.length > 0) {
+                console.log("Errors\n")
+                console.log(errors.join('\n'))
+                result.error_list.length = 0
+                return
+            }
+            
+            word_list = []
+            //fetch dicts, jsonify and send them
+            $('#' + tag_table_id).find('table.dictTable').each(function() {
+                dict = fetchDictTable(this, "form")
+                word_list.push(dict)
+            })
+
+            obj = {'grammar': grammar, 'word_list':word_list}
+            if(grammar.length == 0 || word_list.length == 0) {
+                console.log('No grammar, or no word_list')
+                return
+            }
+            $.post("http://localhost:8000/cgi-bin/reply.py", JSON.stringify(obj), processParse)
+        }
+    </script>
+    
+</head>
+
+<body>
+
+<!-- script type="text/python" src="page_manager.py"></script -->
+
+<div id="input_sentence">
+    <label id="title"><h3>Introduceți o secvență de cuvinte:</h3></label><br/>
+    <input type="text" id="sequence_input" name="sequence_input" value="două proaste"/>
+    <button id="sequence_submit" onclick="sendText()">Analiză morfo.</button>
+</div>
+<br/><br/>
+<div id="tagger_div">
+    <label><h3>Analiză morfologică</h3></label><br/>
+</div>    
+<br/>
+<div id="grammar_edit_div">
+    <label><h3>Gramatică - Reguli</h3></label>
+    <button id="grammar_view_toggle" onclick="$('#grammar_textarea').toggle()">Afișare/Ascundere</button>
+    <br/>
+    <textarea id="grammar_textarea" rows="10" cols="90">
+NumP[num=sg head=n] -> det:Det[Type=possessive gen=@ nr=@],  n:Num[Type=ordinal]
+NumP[num=sg head=n] -> n:Num[Type=ordinal! Definiteness=yes]
+NumP[head=n] ->  n:Num[Type=cardinal]
+DetP[head=det] -> det:Det
+DetP[head=det] -> det:Det[pos=0!] , quant:NumP[num=@ gen=@ cas=@ pos=1!]
+DetP[head=quant] -> quant:NumP
+DetP[head=quant] -> quant:NumP[pos=0!] , de:P[lemma=de! pos=1!]
+DetP += dadj:Adj[num=@ gen=@ cas=@ pos=1!]
+NP[head=noun pers~3] -> noun:N
+NP[head=pron] -> pron:Pron[Pronoun_Form=strong!]
+NP[head=num] -> num:NumP
+NP[has_det~T] += det:DetP[nr=@ cas=@ gen=@ pos=0!]
+NP += adj:Adj[cas=@ gen=@ nr=@]
+NP += comp:PP
+NP += idnum:NumP[gen=@ pos=1!]
+PP[head=prep] -> prep:P[pos=0!] , noun:NP[cas=@]
+VP[head=verb] -> verb:V
+VP[head=aux] -> aux:V[Type=auxiliary pos=0] , part:V[VForm=participle]
+VP += clitic:Pron[Pronoun_Form=weak!]
+VP += subj:NP[nr=@ pers=@ cas=Nom]
+VP += dobj:NP[cas=Acc]
+VP += iobj:NP[cas==Dat!]
+VP += pcomp*:PP
+VP += adv*:Adv
+SP[head=vp] -> part:Part[Type=Subj! pos=0!] , vp:VP[mod=Subj]
+VP += dobj:SP
+    </textarea>
+</div>
+<br/>
+<div id="parse_div">
+     <button id="parse_button" onclick="onParse()">Analiză Sintactică</button>
+</div>
+<br/><br/>
+<div id="cyk_table_div">
+    <label><h3>Tabel Analiză CYK</h3></label>
+</div>
+<br/><br/>
+<div id="tree_div">
+    <label><h3>Arbore Sintactic</h3></label>
+    <br/>
+</div>
+<div id='tree_div_bottom'><br/></div>
+</body>
+</html>
