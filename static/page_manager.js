@@ -29,7 +29,7 @@
                 console.log('No grammar, or no word_list')
                 return
             }
-            $.post("http://localhost:8000/cgi-bin/reply.py", JSON.stringify(obj), processParse)
+            $.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
         }
 
 function createDictTable(dict, parentID, header = null, set_stuff = function(item){}) {

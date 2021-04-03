@@ -1,1 +1,0 @@
-..\venv\Scripts\python.exe tag_server.py

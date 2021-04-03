@@ -3,18 +3,20 @@
 
 <head>
     <title>Toy Grammar</title>
-    <link rel="stylesheet" href="css/stylesheet.css">
-    <link rel="icon" type="image/png" href="img/favicon.png"/>
+    <link rel="stylesheet" href= {{ url_for('static', filename = 'styles/stylesheet.css') }}>
+    <link rel="icon" type="image/png" href={{ url_for('static', filename = 'img/favicon.png') }} />
     <meta charset="utf-8">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src='scripts/rule_parser.js'></script>
-    <script src="scripts/page_manager.js"></script>
+    <script src={{ url_for('static', filename = 'rule_parser.js') }}></script>
+    <script src={{ url_for('static', filename = 'page_manager.js') }}></script>
     <script>
         
         var tag_table_id = "tag_table"
         function sendText() {
             text = document.getElementById("sequence_input").value
-            $.get("http://localhost:8080/?q=" + encodeURIComponent(text),
+            query = "http://localhost:8000/tag-ro"   //"/?q=" + encodeURIComponent(text)
+            $.get(query,
+                  "q=" + encodeURIComponent(text),
                   function(data, status) {
                     var list
                     try {
@@ -34,10 +36,8 @@
                         delete dict.form
                         createDictTable(dict, $cell, header, function(item){item.addClass('dictTable')})
                     }
-            })
-          
+            }) 
         }
-        
     </script>
 
 </head>
