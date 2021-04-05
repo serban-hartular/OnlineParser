@@ -96,3 +96,9 @@ th.editable_score {
 	user-select: none;
 	text-align: center;
 }
+
+span.error_text {
+	color: red;
+	text-decoration-line: underline;
+	text-decoration-style: dotted;
+}

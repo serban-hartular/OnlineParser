@@ -1,36 +1,46 @@
 // "use strict";
 
         
-        function onParse() {
-            toggleGrammarTableText(false); //this synchronizes the contents of grammar_table and grammar_textarea
-            grammar_str = $('#grammar_textarea').val()
-            if(grammar_str.charAt(grammar_str.length-1) != '\n')
-                grammar_str = grammar_str + '\n'
-            
-            result = rule_parser.parse(grammar_str)
-            grammar = result.rule_list
-            errors = result.error_list
-            if(errors.length > 0) {
-                console.log("Errors\n")
-                console.log(errors.join('\n'))
-                result.error_list.length = 0
-                return
-            }
-            
-            word_list = []
-            //fetch dicts, jsonify and send them
-            $('#' + tag_table_id).find('table.dictTable').each(function() {
-                dict = fetchDictTable(this, "form")
-                word_list.push(dict)
-            })
+function onParse() {
+	toggleGrammarTableText(false); //this synchronizes the contents of grammar_table and grammar_textarea
+	textarea_str = $('#grammar_textarea').val()
+	// split by lines and verify
+	lines = textarea_str.split(/[\n\r]+/)
+	errors = []
+	grammar_list = []
+	for(i = 0; i < lines.length; i++) {
+		line = lines[i]
+		if(line == '') continue;
+		result = rule_parser.parse(line)
+		if(result.error_list.length > 0) { //have errors
+			errors = errors.concat(result.error_list)
+			result.error_list.length = 0
+		} else { //add rule 
+			grammar_list.push(result.rule)
+		}
+	}
 
-            obj = {'grammar': grammar, 'word_list':word_list}
-            if(grammar.length == 0 || word_list.length == 0) {
-                console.log('No grammar, or no word_list')
-                return
-            }
-            $.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
-        }
+	if(errors.length > 0) {
+		console.log("Errors\n")
+		console.log(errors.join('\n'))
+		result.error_list.length = 0
+		return
+	}
+	
+	word_list = []
+	//fetch dicts, jsonify and send them
+	$('#' + tag_table_id).find('table.dictTable').each(function() {
+		dict = fetchDictTable(this, "form")
+		word_list.push(dict)
+	})
+
+	obj = {'grammar': grammar_list, 'word_list':word_list}
+	if(grammar_list.length == 0 || word_list.length == 0) {
+		console.log('No grammar, or no word_list')
+		return
+	}
+	$.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
+}
 
 function createDictTable(dict, parentID, header = null, set_stuff = function(item){}) {
     var property;
@@ -179,11 +189,37 @@ function generateTreeView(node_index, $parent, deprel = '') {
 function finishedEditingLine(event) {
 	if(event.type == 'keydown' && event.keyCode == 13) { //keyCode 13 is Enter
             event.preventDefault();
-            this.blur()
+            this.blur() //unfocuses, which will generate a focus event, handled below
 	} else if (event.type == 'focusout') {
 		console.log($(this).text() + ', Do shit!')
+		proofreadRule(this)
 	}
-}
+	}
+	function proofreadRule(cell) {
+		text = $(cell).text()
+		result = rule_parser.parse($(cell).text())
+        grammar = result.rule_list
+        errors = result.error_list
+        if(errors.length > 0) {
+        	for(i = 0; i < errors.length; i++) {
+				console.log(errors[i])
+				//mark up the errors in the table
+				//for now, we'll mark everything starting from the first error
+        	}  
+        	error_col = errors[0][1]-1
+        	//go to previous word
+        	while(error_col > 0 && !text.charAt(error_col).match(/\s/))
+        		error_col--; 
+			text_before = text.slice(0, error_col)
+			text_after = text.slice(error_col)
+			console.log(text_before + ',' + text_after)
+			text = text_before + `<span class="error_text">${ text_after }</span>`
+			$(cell).html(text)	
+        } else { // no errors
+        	$(cell).html($(cell).text()); //unformatted text
+        }
+        errors.length = 0 //clear errors array
+	}
 
 function grammarStrFromTable() {
 	$table = $('#rule_table')
@@ -243,8 +279,14 @@ function toggleGrammarTableText(toggle_visibility = true) {
 		for(i = 0; i < lines.length; i++) {
 			if(lines[i] == '') continue;
 			$row = addNewRule(null)
-			$row.find('.editable_rule').text(lines[i])
+			cell =  $row.find('.editable_rule')
+			$(cell).text(lines[i])			
 		}
+		$cells = $table.find('tr.rule_row > td.editable_rule')
+		$cells.each(function(index, element) {
+			console.log(element)
+			proofreadRule(element)
+		})
 	}
 	if(toggle_visibility) {
 		$table.toggle()

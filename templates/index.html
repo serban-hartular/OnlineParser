@@ -88,7 +88,33 @@
                 </tr>
             </table>
         </div>
-        <textarea id="grammar_textarea" rows="10" cols="90" style="display: none;">
+        <textarea id="grammar_textarea" rows="10" cols="90" style="display: none;" >
+            NumP[num=sg head=n] -> det:Det[Type=possessive gen=@ nr=@],  n:Num[Type=ordinal]
+NumP[num=sg head=n] -> n:Num[Type=ordinal! Definiteness=yes]
+NumP[head=n] ->  n:Num[Type=cardinal]
+DetP[head=det] -> det:Det
+DetP[head=det] -> det:Det[pos=0!] , quant:NumP[num=@ gen=@ cas=@ pos=1!]
+DetP[head=quant] -> quant:NumP
+DetP[head=quant] -> quant:NumP[pos=0!] , de:P[lemma=de! pos=1!]
+DetP += dadj:Adj[num=@ gen=@ cas=@ pos=1!]
+NP[head=noun pers~3] -> noun:N
+NP[head=pron] -> pron:Pron[Pronoun_Form=strong!]
+NP[head=num] -> num:NumP
+NP[has_det~T] += det:DetP[nr=@ cas=@ gen=@ pos=0!]
+NP += adj:Adj[cas=@ gen=@ nr=@]
+NP += comp:PP
+NP += idnum:NumP[gen=@ pos=1!]
+PP[head=prep] -> prep:P[pos=0!] , noun:NP[cas=@]
+VP[head=verb] -> verb:V
+VP[head=aux] -> aux:V[Type=auxiliary pos=0] , part:V[VForm=participle]
+VP += clitic:Pron[Pronoun_Form=weak!]
+VP += subj:NP[nr=@ pers=@ cas=Nom]
+VP += dobj:NP[cas=Acc]
+VP += iobj:NP[cas==Dat!]
+VP += pcomp*:PP
+VP += adv*:Adv
+SP[head=vp] -> part:Part[Type=Subj! pos=0!] , vp:VP[mod=Subj]
+VP += dobj:SP
     </textarea>
     </div>
 </div>

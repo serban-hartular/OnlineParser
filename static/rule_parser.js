@@ -72,65 +72,59 @@
   }
 */
 var rule_parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[2,5,10,14],$V1=[1,8],$V2=[8,10,11,13,14],$V3=[10,13,14],$V4=[2,10],$V5=[1,18],$V6=[1,21],$V7=[1,22],$V8=[14,19],$V9=[14,25,26],$Va=[14,19,30,31];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[5,7,9,11,12],$V2=[5,11,12],$V3=[2,7],$V4=[1,15],$V5=[1,17],$V6=[1,18],$V7=[12,17],$V8=[12,23,24],$V9=[12,17,28,29];
 var parser = {trace: function trace () { },
 yy: {},
-symbols_: {"error":2,"expressions":3,"rule_list":4,"EOF":5,"rule":6,"phrase":7,"->":8,"child_list":9,"EOL":10,"+=":11,"child":12,",":13,"STRING":14,":":15,"*":16,"[":17,"constraint_list":18,"]":19,"constraint":20,"lval":21,"operator":22,"rval":23,"mark":24,"@":25,"NUMBER":26,"=":27,"==":28,"~":29,"!":30,"?":31,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",8:"->",10:"EOL",11:"+=",13:",",14:"STRING",15:":",16:"*",17:"[",19:"]",25:"@",26:"NUMBER",27:"=",28:"==",29:"~",30:"!",31:"?"},
-productions_: [0,[3,2],[4,2],[4,0],[6,4],[6,4],[6,2],[6,1],[9,2],[9,3],[9,0],[12,3],[12,4],[7,1],[7,4],[18,2],[18,1],[20,3],[20,4],[21,1],[23,1],[23,1],[23,1],[22,1],[22,1],[22,1],[24,1],[24,2]],
+symbols_: {"error":2,"expression":3,"rule":4,"EOF":5,"phrase":6,"->":7,"child_list":8,"+=":9,"child":10,",":11,"STRING":12,":":13,"*":14,"[":15,"constraint_list":16,"]":17,"constraint":18,"lval":19,"operator":20,"rval":21,"mark":22,"@":23,"NUMBER":24,"=":25,"==":26,"~":27,"!":28,"?":29,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",7:"->",9:"+=",11:",",12:"STRING",13:":",14:"*",15:"[",17:"]",23:"@",24:"NUMBER",25:"=",26:"==",27:"~",28:"!",29:"?"},
+productions_: [0,[3,2],[4,3],[4,3],[4,1],[8,2],[8,3],[8,0],[10,3],[10,4],[6,1],[6,4],[16,2],[16,1],[18,3],[18,4],[19,1],[21,1],[21,1],[21,1],[20,1],[20,1],[20,1],[22,1],[22,2]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
- return { 'rule_list':$$[$0-1], 'error_list':error_list}; 
+ return { 'rule':$$[$0-1], 'error_list':error_list}; 
 break;
-case 2:
- this.$ = $$[$0-1]; if($$[$0] != null) { $$[$0-1].push($$[$0]) } 
+case 2: case 3:
+ this.$ = $$[$0]; this.$.unshift($$[$0-2], $$[$0-1]) 
 break;
-case 3: case 10:
- this.$ = [] 
+case 4:
+ console.log('Error on line ' + _$[$0].first_line + ' col ' + _$[$0].first_column + ' to ' + _$[$0].last_column);
+                        error_list.push([_$[$0].first_line, _$[$0].first_column, _$[$0].last_column]);
+                     
 break;
-case 4: case 5:
- this.$ = $$[$0-1]; this.$.unshift($$[$0-3], $$[$0-2]) 
-break;
-case 6:
- console.log('Error on line ' + _$[$0-1].first_line + ' col ' + _$[$0-1].first_column + ' to ' + _$[$0-1].last_column);
-                        error_list.push('Error on line ' + _$[$0-1].first_line + ' col ' + _$[$0-1].first_column + ' to ' + _$[$0-1].last_column);
-                        
-break;
-case 7:
-this.$ = null
-break;
-case 8: case 15:
+case 5: case 12:
  this.$ = $$[$0-1]; this.$.push($$[$0]) 
 break;
-case 9:
+case 6:
  this.$ = $$[$0-2]; this.$.push($$[$0]) /*    |   child { this.$ = [$$[$0-2]]; } */ 
 break;
-case 11: case 17:
+case 7:
+ this.$ = [] 
+break;
+case 8: case 14:
  this.$ = $$[$0-2] + $$[$0-1] + $$[$0]; 
 break;
-case 12: case 18:
+case 9: case 15:
  this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0]; 
 break;
-case 13:
+case 10:
  this.$ = $$[$0] 
 break;
-case 14:
+case 11:
 this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1].join(' ') + $$[$0]; 
 break;
-case 16:
+case 13:
  this.$ = [$$[$0]]; 
 break;
-case 27:
+case 24:
 this.$ = $$[$0-1] + $$[$0] 
 break;
 }
 },
-table: [o($V0,[2,3],{3:1,4:2}),{1:[3]},{2:[1,6],5:[1,3],6:4,7:5,10:[1,7],14:$V1},{1:[2,1]},o($V0,[2,2]),{8:[1,9],11:[1,10]},{10:[1,11]},o($V0,[2,7]),o($V2,[2,13],{17:[1,12]}),o($V3,$V4,{9:13}),o($V3,$V4,{9:14}),o($V0,[2,6]),{14:$V5,18:15,20:16,21:17},{10:[1,19],12:20,13:$V6,14:$V7},{10:[1,23],12:20,13:$V6,14:$V7},{14:$V5,19:[1,24],20:25,21:17},o($V8,[2,16]),{22:26,27:[1,27],28:[1,28],29:[1,29]},o([27,28,29],[2,19]),o($V0,[2,4]),o($V3,[2,8]),{12:30,14:$V7},{15:[1,31],16:[1,32]},o($V0,[2,5]),o($V2,[2,14]),o($V8,[2,15]),{14:[1,34],23:33,25:[1,35],26:[1,36]},o($V9,[2,23]),o($V9,[2,24]),o($V9,[2,25]),o($V3,[2,9]),{7:37,14:$V1},{15:[1,38]},o($V8,[2,17],{24:39,30:[1,40],31:[1,41]}),o($Va,[2,20]),o($Va,[2,21]),o($Va,[2,22]),o($V3,[2,11]),{7:42,14:$V1},o($V8,[2,18]),o($V8,[2,26]),{26:[1,43]},o($V3,[2,12]),o($V8,[2,27])],
-defaultActions: {3:[2,1]},
+table: [{2:[1,4],3:1,4:2,6:3,12:$V0},{1:[3]},{5:[1,6]},{7:[1,7],9:[1,8]},{5:[2,4]},o($V1,[2,10],{15:[1,9]}),{1:[2,1]},o($V2,$V3,{8:10}),o($V2,$V3,{8:11}),{12:$V4,16:12,18:13,19:14},{5:[2,2],10:16,11:$V5,12:$V6},{5:[2,3],10:16,11:$V5,12:$V6},{12:$V4,17:[1,19],18:20,19:14},o($V7,[2,13]),{20:21,25:[1,22],26:[1,23],27:[1,24]},o([25,26,27],[2,16]),o($V2,[2,5]),{10:25,12:$V6},{13:[1,26],14:[1,27]},o($V1,[2,11]),o($V7,[2,12]),{12:[1,29],21:28,23:[1,30],24:[1,31]},o($V8,[2,20]),o($V8,[2,21]),o($V8,[2,22]),o($V2,[2,6]),{6:32,12:$V0},{13:[1,33]},o($V7,[2,14],{22:34,28:[1,35],29:[1,36]}),o($V9,[2,17]),o($V9,[2,18]),o($V9,[2,19]),o($V2,[2,8]),{6:37,12:$V0},o($V7,[2,15]),o($V7,[2,23]),{24:[1,38]},o($V2,[2,9]),o($V7,[2,24])],
+defaultActions: {4:[2,4],6:[2,1]},
 parseError: function parseError (str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -380,7 +374,8 @@ _handle_error:
 }};
 
 
-var error_list = []
+error_list = []
+
     
 /* generated by jison-lex 0.3.4 */
 var lexer = (function(){
@@ -712,46 +707,44 @@ var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:/* skip whitespace */
 break;
-case 1:return 10
+case 1:return 24;
 break;
-case 2:return 26;
+case 2:return 24;
 break;
-case 3:return 26;
+case 3:return 12
 break;
-case 4:return 14
+case 4:return 7
 break;
-case 5:return 8
+case 5:return 9
 break;
-case 6:return 11
+case 6:return 26;
 break;
-case 7:return 28;
+case 7:return 25;
 break;
 case 8:return 27;
 break;
-case 9:return 29;
+case 9:return 28;
 break;
-case 10:return 30;
+case 10:return 29;
 break;
-case 11:return 31;
+case 11:return 23
 break;
-case 12:return 25
+case 12:return 5;
 break;
-case 13:return 5;
+case 13:return 15
 break;
 case 14:return 17
 break;
-case 15:return 19
+case 15:return 11
 break;
 case 16:return 13
 break;
-case 17:return 15
-break;
-case 18:return yy_.yytext[0]
+case 17:return yy_.yytext[0]
 break;
 }
 },
-rules: [/^(?:[ \t]+)/,/^(?:[\n\r]+)/,/^(?:[0-9]+(\.[0-9]+)?\b)/,/^(?:\.[0-9]+\b)/,/^(?:[a-zA-Z][_a-zA-Z0-9]*\b)/,/^(?:->)/,/^(?:\+=)/,/^(?:==)/,/^(?:=)/,/^(?:~)/,/^(?:!)/,/^(?:\?)/,/^(?:@)/,/^(?:$)/,/^(?:\[)/,/^(?:\])/,/^(?:,)/,/^(?::)/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],"inclusive":true}}
+rules: [/^(?:\s+)/,/^(?:[0-9]+(\.[0-9]+)?\b)/,/^(?:\.[0-9]+\b)/,/^(?:[a-zA-Z][_a-zA-Z0-9]*\b)/,/^(?:->)/,/^(?:\+=)/,/^(?:==)/,/^(?:=)/,/^(?:~)/,/^(?:!)/,/^(?:\?)/,/^(?:@)/,/^(?:$)/,/^(?:\[)/,/^(?:\])/,/^(?:,)/,/^(?::)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":true}}
 });
 return lexer;
 })();

@@ -3,8 +3,7 @@
 
 %%
 
-[ \t]+                   /* skip whitespace */
-[\n\r]+                 return 'EOL'
+\s+                   /* skip whitespace */
 [0-9]+("."[0-9]+)?\b        return 'NUMBER';
 "."[0-9]+\b                 return 'NUMBER';
 [a-zA-Z][_a-zA-Z0-9]*\b  return 'STRING'
@@ -34,28 +33,31 @@
  * %left UMINUS
  *******************/
 
-%start expressions
+%start expression
 
 
 %% /* language grammar */
 
 
-expressions : rule_list EOF { return { 'rule_list':$1, 'error_list':error_list}; }
+expression : rule EOF { return { 'rule':$1, 'error_list':error_list}; }
             ;
 
+/**********
 rule_list
     :   rule_list rule      { $$ = $1; if($2 != null) { $1.push($2) } }
     |                       { $$ = [] }
     ;
+***********/
 
 rule
-    :   phrase '->' child_list EOL   { $$ = $3; $$.unshift($1, $2) }
-    |   phrase '+=' child_list EOL   { $$ = $3; $$.unshift($1, $2) }
-    |   error  EOL      { console.log('Error on line ' + @1.first_line + ' col ' + @1.first_column + ' to ' + @1.last_column);
-                        error_list.push('Error on line ' + @1.first_line + ' col ' + @1.first_column + ' to ' + @1.last_column);
-                        }
-    |   EOL         {$$ = null}
-    ;
+    :   phrase '->' child_list    { $$ = $3; $$.unshift($1, $2) }
+    |   phrase '+=' child_list    { $$ = $3; $$.unshift($1, $2) }
+    |   error        { console.log('Error on line ' + @1.first_line + ' col ' + @1.first_column + ' to ' + @1.last_column);
+                        error_list.push([@1.first_line, @1.first_column, @1.last_column]);
+                     }
+	;
+
+/**** each rule for 'rule' ended in EOL, and there was an empty rule (just EOL) *******/
 
 child_list
     :   child_list child        { $$ = $1; $$.push($2) }
@@ -103,5 +105,6 @@ mark        :   '!'
 
 %%
 
-var error_list = []
+error_list = []
+
     
