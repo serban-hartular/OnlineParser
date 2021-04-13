@@ -35,8 +35,12 @@ function onParse() {
 	})
 
 	obj = {'grammar': grammar_list, 'word_list':word_list}
-	if(grammar_list.length == 0 || word_list.length == 0) {
-		console.log('No grammar, or no word_list')
+	if(grammar_list.length == 0) {
+		alert('No grammar!')
+		return
+	}
+	if(word_list.length == 0) {
+		alert('No tagged word list!')
 		return
 	}
 	$.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
@@ -84,7 +88,12 @@ function fetchDictTable(tableID, header_property) {
 
 function processParse(data, status, table_class='cyk_table_class') {
     //CGI does: print(json.dumps({'dict_list':dict_list, 'dict_table':dict_table}))
-    reply_obj = JSON.parse(data)
+    try {
+    	reply_obj = JSON.parse(data)
+    } catch (err) {
+    	alert(data + '\n(' + err + ')')
+    	return
+    }
     parse_table = reply_obj.parse_table
     dict_list = reply_obj.dict_list
     // create dictionary of nodes by index
@@ -277,7 +286,7 @@ function toggleGrammarTableText(toggle_visibility = true) {
 		let lines = grammar_str.split(/[\r\n]+/)
 		console.log(lines)
 		for(i = 0; i < lines.length; i++) {
-			if(lines[i] == '') continue;
+			if(lines[i].match(/^\s*$/)) continue;
 			$row = addNewRule(null)
 			cell =  $row.find('.editable_rule')
 			$(cell).text(lines[i])			
@@ -289,7 +298,8 @@ function toggleGrammarTableText(toggle_visibility = true) {
 		})
 	}
 	if(toggle_visibility) {
-		$table.toggle()
+		//$table.toggle()
+		$('#grammar_table_div').toggle() //#grammar_table_div'
 		$textarea.toggle()
 	}
 }

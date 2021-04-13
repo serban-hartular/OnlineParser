@@ -63,8 +63,10 @@
     </p>
     <br/>
     <div  id="grammar_edit_div">
-        <button id="grammar_text_table_toggle" onclick="toggleGrammarTableText()">Tabel/Text simplu</button>
-        <div id="grammar_table_div">
+        <p>
+            <button id="grammar_text_table_toggle" onclick="toggleGrammarTableText()">Tabel/Text simplu</button>
+        </p>
+        <div id="grammar_table_div" style="display: none;">
             <table><tr>
                 <td>Filtru</td>
                 <td><input id="filter" oninput="onFilterInput(event)"></input/></td>
@@ -88,8 +90,9 @@
                 </tr>
             </table>
         </div>
-        <textarea id="grammar_textarea" rows="10" cols="90" style="display: none;" >
-            NumP[num=sg head=n] -> det:Det[Type=possessive gen=@ nr=@],  n:Num[Type=ordinal]
+        <!-- textarea id="grammar_textarea" rows="10" cols="90" style="display: none;" -->
+            <textarea id="grammar_textarea" rows="10" cols="90">
+NumP[num=sg head=n] -> det:Det[Type=possessive gen=@ nr=@],  n:Num[Type=ordinal]
 NumP[num=sg head=n] -> n:Num[Type=ordinal! Definiteness=yes]
 NumP[head=n] ->  n:Num[Type=cardinal]
 DetP[head=det] -> det:Det
@@ -136,14 +139,6 @@ VP += dobj:SP
 <script>
     $('.editable_rule').on('keydown focusout', finishedEditingLine)
     $('.editable_score').on('keydown focusout', finishedEditingLine)
-//    function(event) {
-//        if(event.type == 'keydown' && event.keyCode == 13) {
-//            event.preventDefault();
-//            this.blur()
-//        } else {
-//            console.log('Do shit!')
-//        }
-//    })
 </script>
 
 </body>

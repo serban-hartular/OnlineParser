@@ -62,7 +62,7 @@ rule
 child_list
     :   child_list child        { $$ = $1; $$.push($2) }
     |   child_list ',' child    { $$ = $1; $$.push($3) /*    |   child { $$ = [$1]; } */ }
-    |                           { $$ = [] }
+    |   child	              	{ $$ = [$1] }
     ;
 
 child

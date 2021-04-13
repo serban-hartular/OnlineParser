@@ -27,4 +27,6 @@ def get_cyk_parse(req_dict: dict) -> str:
     cyk.parse()
 
     dict_list, parse_table = cyk.table_to_plain_data()
-    return json.dumps({'dict_list':dict_list, 'parse_table':parse_table})
+    ret_obj_json = json.dumps({'dict_list':dict_list, 'parse_table':parse_table})
+    # print(ret_obj_json)
+    return ret_obj_json

@@ -67,13 +67,17 @@ label.cyk_table_class {
 
 table.editable_table {
 	table-layout: fixed;
-  	width: 520px;
+  	width: 620px;
 	border: 1px solid black; 
   	border-collapse: collapse;
+  	
+  	display: block;
+  	height: 400px;
+  	overflow-y: scroll;
 }
 
 th.editable_rule {
-	width: 400px;
+	width: 550px;
 	font-weight: bold;
 //	border: 1px solid black; 
 //  	border-collapse: collapse;
@@ -90,6 +94,11 @@ th.editable_score {
 	border: 1px solid black; 
   	border-collapse: collapse;
   	padding-left: 5px;
+}
+
+.editable_rule, .editable_score {
+	font-family: "Courier New", sans-serif;
+	font-size: 8.5pt;
 }
 
 .delete_cell {
