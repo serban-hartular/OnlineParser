@@ -1,49 +1,32 @@
 // "use strict";
 
-        
-function onParse() {
-	toggleGrammarTableText(false); //this synchronizes the contents of grammar_table and grammar_textarea
-	textarea_str = $('#grammar_textarea').val()
-	// split by lines and verify
-	lines = textarea_str.split(/[\n\r]+/)
-	errors = []
-	grammar_list = []
-	for(i = 0; i < lines.length; i++) {
-		line = lines[i]
-		if(line == '') continue;
-		result = rule_parser.parse(line)
-		if(result.error_list.length > 0) { //have errors
-			errors = errors.concat(result.error_list)
-			result.error_list.length = 0
-		} else { //add rule 
-			grammar_list.push(result.rule)
-		}
-	}
-
-	if(errors.length > 0) {
-		console.log("Errors\n")
-		console.log(errors.join('\n'))
-		result.error_list.length = 0
-		return
-	}
-	
-	word_list = []
-	//fetch dicts, jsonify and send them
-	$('#' + tag_table_id).find('table.dictTable').each(function() {
-		dict = fetchDictTable(this, "form")
-		word_list.push(dict)
-	})
-
-	obj = {'grammar': grammar_list, 'word_list':word_list}
-	if(grammar_list.length == 0) {
-		alert('No grammar!')
-		return
-	}
-	if(word_list.length == 0) {
-		alert('No tagged word list!')
-		return
-	}
-	$.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
+var tag_table_id = "tag_table"
+function sendText() {
+	text = document.getElementById("sequence_input").value
+	query = "http://localhost:8000/tag-ro"   //"/?q=" + encodeURIComponent(text)
+	$.get(query,
+		  "q=" + encodeURIComponent(text),
+		  function(data, status) {
+			var list
+			try {
+				list = JSON.parse(data)
+			}
+			catch {
+				console.log('error json parsing \"' + data + '\"')
+				return
+			}
+			
+			$('#' + tag_table_id).remove() // remove tag table
+			var $tag_table = $(`<table id=${ tag_table_id }><tr>`).appendTo($('#tagger_div'))
+			for(i = 0; i < list.length; i++) {
+				$cell = $('<td>').appendTo($tag_table)
+				var homonyms = list[i]
+				var dict = homonyms[0]
+				header = dict['form']
+				delete dict.form
+				createDictTable(dict, $cell, header, function(item){item.addClass('dictTable')})
+			}
+	}) 
 }
 
 function createDictTable(dict, parentID, header = null, set_stuff = function(item){}) {
@@ -70,6 +53,52 @@ function createDictTable(dict, parentID, header = null, set_stuff = function(ite
         set_stuff($v)
     }
     return $table
+}
+        
+function onParse() {
+	toggleGrammarTableText(false); //this synchronizes the contents of grammar_table and grammar_textarea
+	textarea_str = $('#grammar_textarea').val()
+	// split by lines and verify
+	lines = textarea_str.split(/[\n\r]+/)
+	errors = []
+	grammar_list = []
+	for(i = 0; i < lines.length; i++) {
+		line = lines[i]
+		if(line == '') continue;
+		result = rule_parser.parse(line)
+		if(result.error_list.length > 0) { //have errors
+			errors = errors.concat(result.error_list)
+			result.error_list.length = 0 //clear error_list
+		} else { //add rule 
+			grammar_list.push(result) //object has attributes 'rule', 'weight'
+		}
+	}
+
+	if(errors.length > 0) {
+//		console.log("Errors\n")
+//		console.log(errors.join('\n'))
+		alert("Errors in grammar!")
+		result.error_list.length = 0
+		return
+	}
+	
+	word_list = []
+	//fetch dicts, jsonify and send them
+	$('#' + tag_table_id).find('table.dictTable').each(function() {
+		dict = fetchDictTable(this, "form")
+		word_list.push([dict])  //here we should send [dict], to account for homonymy
+	})
+
+	obj = {'grammar': grammar_list, 'word_list':word_list}
+	if(grammar_list.length == 0) {
+		alert('No grammar!')
+		return
+	}
+	if(word_list.length == 0) {
+		alert('No tagged word list!')
+		return
+	}
+	$.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
 }
 
 function fetchDictTable(tableID, header_property) {
@@ -200,7 +229,7 @@ function finishedEditingLine(event) {
             event.preventDefault();
             this.blur() //unfocuses, which will generate a focus event, handled below
 	} else if (event.type == 'focusout') {
-		console.log($(this).text() + ', Do shit!')
+		//console.log($(this).text() + ', Do shit!')
 		proofreadRule(this)
 	}
 	}
@@ -221,7 +250,6 @@ function finishedEditingLine(event) {
         		error_col--; 
 			text_before = text.slice(0, error_col)
 			text_after = text.slice(error_col)
-			console.log(text_before + ',' + text_after)
 			text = text_before + `<span class="error_text">${ text_after }</span>`
 			$(cell).html(text)	
         } else { // no errors
@@ -239,7 +267,7 @@ function grammarStrFromTable() {
 		cell = $row.find('.editable_rule')[0]
 		grammar_str = grammar_str + $(cell).text() + '\n'
 	}
-	console.log(grammar_str)
+	//console.log(grammar_str)
 	return grammar_str;
 }
 
@@ -261,7 +289,6 @@ function deleteRule(event) {
 
 function onFilterInput(event) {
 	filter_string = $('#filter').val()
-//	console.log(filter_string)
 	$rows = $('tr.rule_row')
 	for(i = 0; i < $rows.length; i++) {
 		$row = $($rows[i])
@@ -284,7 +311,6 @@ function toggleGrammarTableText(toggle_visibility = true) {
 		$('tr.rule_row').remove()
 		let grammar_str = $textarea.val()
 		let lines = grammar_str.split(/[\r\n]+/)
-		console.log(lines)
 		for(i = 0; i < lines.length; i++) {
 			if(lines[i].match(/^\s*$/)) continue;
 			$row = addNewRule(null)
@@ -293,7 +319,7 @@ function toggleGrammarTableText(toggle_visibility = true) {
 		}
 		$cells = $table.find('tr.rule_row > td.editable_rule')
 		$cells.each(function(index, element) {
-			console.log(element)
+			//console.log(element)
 			proofreadRule(element)
 		})
 	}

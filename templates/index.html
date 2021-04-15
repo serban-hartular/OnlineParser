@@ -9,37 +9,6 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src={{ url_for('static', filename = 'rule_parser.js') }}></script>
     <script src={{ url_for('static', filename = 'page_manager.js') }}></script>
-    <script>
-        
-        var tag_table_id = "tag_table"
-        function sendText() {
-            text = document.getElementById("sequence_input").value
-            query = "http://localhost:8000/tag-ro"   //"/?q=" + encodeURIComponent(text)
-            $.get(query,
-                  "q=" + encodeURIComponent(text),
-                  function(data, status) {
-                    var list
-                    try {
-                        list = JSON.parse(data)
-                    }
-                    catch {
-                        console.log('error json parsing \"' + data + '\"')
-                        return
-                    }
-                    
-                    $('#' + tag_table_id).remove() // remove tag table
-                    var $tag_table = $(`<table id=${ tag_table_id }><tr>`).appendTo($('#tagger_div'))
-                    for(i = 0; i < list.length; i++) {
-                        $cell = $('<td>').appendTo($tag_table)
-                        var dict = list[i]
-                        header = dict['form']
-                        delete dict.form
-                        createDictTable(dict, $cell, header, function(item){item.addClass('dictTable')})
-                    }
-            }) 
-        }
-    </script>
-
 </head>
 
 <body>
@@ -139,6 +108,7 @@ VP += dobj:SP
 <script>
     $('.editable_rule').on('keydown focusout', finishedEditingLine)
     $('.editable_score').on('keydown focusout', finishedEditingLine)
+    toggleGrammarTableText()
 </script>
 
 </body>

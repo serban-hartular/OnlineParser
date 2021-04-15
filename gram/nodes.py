@@ -1,11 +1,14 @@
 
 from collections import UserDict
 
+comparison_features_to_ignore = {'pos', 'index', 'PROBABILITY'}
+
 class Monomial(UserDict):
     LEMMA = 'lemma'
     CATEGORY = 'CAT'
     FORM = 'form'
     POS = 'pos' # position
+    PROBABILITY = 'PROBABILITY'
     def __init__(self, d):
         super().__init__(d)
         keys = set(self.keys())
@@ -14,14 +17,20 @@ class Monomial(UserDict):
             raise Exception('Monomial must include %s data' % Monomial.CATEGORY)
         if Monomial.FORM not in keys:
             self[Monomial.FORM] = ''
+        if Monomial.PROBABILITY not in keys:
+            self[Monomial.PROBABILITY] = 0
         self.error_score = 0
         self.errors = list()
+
     def feature_set(self): # returns attributes except for reserved ones (CATEGORY and FORM)
-        return set(self.keys()) - {Monomial.CATEGORY, Monomial.FORM, Monomial.POS}
+        return set(self.keys()) - {Monomial.CATEGORY, Monomial.FORM, Monomial.POS, Monomial.PROBABILITY}
     def category(self) -> str:
         return self[Monomial.CATEGORY]
     def form(self) -> str:
         return self[Monomial.FORM]
+    def probability(self, value=None):
+        if value is None: return self[Monomial.PROBABILITY]
+        self[Monomial.PROBABILITY] = value
     def __getitem__(self, item):
         if item not in self.keys(): return None
         return super().__getitem__(item)
@@ -66,7 +75,11 @@ class Polynomial(Monomial):
     def __eq__(self, other):
         if not isinstance(other, Polynomial):
             return False
-        if self.data != other.data:
+        # if self.data != other.data:
+        #     return False
+        my_dict = {k:self.data[k] for k in self.data if k not in comparison_features_to_ignore}
+        other_dict = {k:other.data[k] for k in other.data if k not in comparison_features_to_ignore}
+        if my_dict != other_dict:
             return False
         if len(self.children) != len(other.children):
             return False

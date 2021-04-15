@@ -13,12 +13,13 @@ def get_cyk_parse(req_dict: dict) -> str:
     if 'grammar' not in req_dict or 'word_list' not in req_dict:
         return 'Error, bad input'
 
-    word_list = req_dict['word_list']
-    m_list = [Monomial(d) for d in word_list]
+    word_list = req_dict['word_list'] 
+    m_list = [[Monomial(d) for d in item] if isinstance(item, list) else Monomial(item) for item in word_list]
     grammar = Grammar()
-    rule_list = req_dict['grammar']
-    for rule in rule_list:
-        rule_str = ' '.join(rule[:2]) + ' ' + ' , '.join(rule[2:])
+    rule_list = req_dict['grammar'] # a list of objects with attributes 'rule', 'weight' 
+    for obj in rule_list:
+        rule = obj['rule'] # rule the list of tokens: 'VP[head=verb]', '->', 'verb:V', etc.
+        rule_str = ' '.join(rule[:2]) + ' ' + ' , '.join(rule[2:]) # join the children with commas
         try:
             grammar.add_rule(rule_from_string(rule_str))
         except Exception as ex:

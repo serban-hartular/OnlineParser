@@ -3,6 +3,9 @@ import json
 import tag_server
 import cyk_reply
 
+import sqlite3
+from sqlite3 import Error
+
 app = Flask(__name__)
 
 
@@ -33,4 +36,5 @@ def cyk_parse():
     return bytes(response_str, 'utf8')
 
 if __name__ == '__main__':
+    database_file = ''
     app.run(port=8000)

@@ -14,9 +14,12 @@ class CYK_Parser:
         self.table.append(list())
         self.index = 0
         for item in sequence:
-            item['index'] = self.index
-            self.index += 1
-            self.table[0].append([item]) # bottom-most row, contains sequence
+            # item['index'] = self.index
+            # self.index += 1
+            self.table[0].append(item if isinstance(item, list) else [item]) # bottom-most row, contains sequence
+            for n in self.table[0][-1]:
+                n['index'] = self.index
+                self.index += 1
         for row in range(len(sequence)):
             vector = []
             for col in range(len(sequence)-row):
@@ -60,7 +63,8 @@ class CYK_Parser:
                         self._append_if_good(polynomial, target)
                         polynomial = rule.apply([n2, n1]) # reverse order
                         self._append_if_good(polynomial, target)
-            self._do_unary_rules(target)
+            self._do_unary_rules(target) # non-terminal unary rules are allowed
+
     def _do_unary_rules(self, cell : list):
         j = 0
         while j < len(cell):
@@ -69,6 +73,7 @@ class CYK_Parser:
                 polynomial = rule.apply([m])
                 self._append_if_good(polynomial, cell)
             j += 1
+
     def _append_if_good(self, polynomial : Polynomial, target : list):
         if polynomial and polynomial.error_score < self.error_threshold and polynomial not in target:
             polynomial['index'] = self.index

@@ -3,12 +3,12 @@ from nodes import Polynomial, Monomial
 
 
 class Rule:
-    def __init__(self, ph_type:str, children_names:list, requirements : list, text:str = ''):#, append_flag = False):
-        # if f
+    def __init__(self, ph_type:str, children_names:list, requirements : list, text:str = '', probability:float=1):
         self.ph_type = ph_type
         self.children_names = children_names     
         self.requirements = requirements
         self.text = text
+        self.probability = probability
         # self.append_flag = append_flag # if flat_flag, nodes will be appended, otherwise, new structure
     def apply(self, children:list) -> Polynomial:
         phrase = self._build_phrase(children)
@@ -52,8 +52,8 @@ class Rule:
 class AppendRule(Rule):
     SELF = 'self'
     STAR = '*'
-    def __init__(self, ph_type:str, children_names: list, requirements, text:str = ''):
-        super().__init__(ph_type, children_names, requirements, text)
+    def __init__(self, ph_type:str, children_names: list, requirements, text:str = '', probability:float=1):
+        super().__init__(ph_type, children_names, requirements, text, probability)
         if AppendRule.SELF not in children_names:
             raise Exception('Append Rule: parent must have deprel %s', AppendRule.SELF)
         self.self_index = children_names.index(AppendRule.SELF)
@@ -107,8 +107,8 @@ class AppendRule(Rule):
 
 class Headed_Rule(Rule):
     def __init__(self, ph_type: str, children_names: list, head_name:str, attrib_dict:dict,
-                 requirements: list, text:str = ''):
-        super().__init__(ph_type, children_names, requirements, text)
+                 requirements: list, text:str = '',  probability:float=1):
+        super().__init__(ph_type, children_names, requirements, text, probability)
         self.head_name = head_name
         if self.head_name not in children_names:
             raise Exception('head child "%s" not found in rule %s ' % (head_name, str(children_names)))

@@ -58,7 +58,8 @@ my_ro_list = [
     ('Person', 'pers'),
     ('first', '1'),
     ('second', '2'),
-    ('third', '3')
+    ('third', '3'),
+    ('int-rel', 'rel')
 ]
 
 current_abbrev = my_ro_list

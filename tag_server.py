@@ -12,6 +12,8 @@ from abbrev import full_to_abbrev
 from conllu_msd_to_monomial import MSD_dict
 from msd_convert import UPOS_to_MSD, MSD_to_attribs
 
+import nodes
+
 # hostName = "localhost"
 # serverPort = 8080
 # QUERY = 'q'
@@ -51,24 +53,18 @@ def token_to_dict(token, use_abbrev = True) -> Dict:
     return attribs
 
 
-def sequence_to_dicts(sequence:str) -> List[Dict]:
+def sequence_to_dicts(sequence:str) -> List[List[Dict]]:
     sentences = ro_cube(sequence)
-    m_list = []
+    tag_list = []
     for s in sentences:
         for t in s:
-            m = token_to_dict(t)
-            if m:
-                m_list.append(dict(m))
-    return m_list
+            monome = token_to_dict(t)
+            if monome:
+                tag_list.append(generate_homonyms(monome))
+    return tag_list
 
-# if __name__ == "__main__":        
-#     webServer = http.server.HTTPServer((hostName, serverPort), POSTagRequestHandler)
-#     print("Server started http://%s:%s" % (hostName, serverPort))
-# 
-#     try:
-#         webServer.serve_forever()
-#     except KeyboardInterrupt:
-#         pass
-# 
-#     webServer.server_close()
-#     print("Server stopped.")
+def generate_homonyms(tag : dict) -> List[Dict]:
+    homonyms = [tag]
+    # vorbesc : 1st sg, 3rd pl.
+    # if tag[nodes.Monomial.CATEGORY] == 'V' and tag[nodes.Monomial.FORM].endswith('esc'):    
+    return homonyms

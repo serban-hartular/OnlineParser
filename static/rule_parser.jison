@@ -39,15 +39,10 @@
 %% /* language grammar */
 
 
-expression : rule EOF { return { 'rule':$1, 'error_list':error_list}; }
+expression 	: rule EOF 			{ return { 'rule':$1, 'error_list':error_list, 'weight':1 }; }
+			| rule NUMBER EOF 	{ return { 'rule':$1, 'error_list':error_list, 'weight':parseFloat($2) }; }
             ;
 
-/**********
-rule_list
-    :   rule_list rule      { $$ = $1; if($2 != null) { $1.push($2) } }
-    |                       { $$ = [] }
-    ;
-***********/
 
 rule
     :   phrase '->' child_list    { $$ = $3; $$.unshift($1, $2) }
