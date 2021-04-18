@@ -13,33 +13,34 @@ function sendText() {
 			}
 			catch {
 				console.log('error json parsing \"' + data + '\"')
+				alert('error json parsing \"' + data + '\"')
 				return
 			}
 			
 			$('#' + tag_table_id).remove() // remove tag table
-			var $tag_table = $(`<table id=${ tag_table_id }><tr>`).appendTo($('#tagger_div'))
+			var $tag_table = $(`<table id=${ tag_table_id }>`).appendTo($('#tagger_div'))
+			var $tag_row = $('<tr id="only">').appendTo($tag_table)
 			for(i = 0; i < list.length; i++) {
-				$cell = $('<td>').appendTo($tag_table)
+				$word_cell = $('<table class="wordTable">').appendTo($('<td>').appendTo($tag_row))
+				//cell will have a table: first row word form, following rows one for each morpho. analysis
 				var homonyms = list[i]
-				var dict = homonyms[0]
-				header = dict['form']
-				delete dict.form
-				createDictTable(dict, $cell, header, function(item){item.addClass('dictTable')})
+				$word_cell.append(`<tr><th class="dictWrapper">${ homonyms[0]['form'] }</th></tr>`)
+				for(j = 0; j < homonyms.length; j++) {
+					var dict = homonyms[j]
+					delete dict.form
+					$tag_cell = $('<td class="dictWrapper">').appendTo($('<tr>').appendTo($word_cell))
+					createDictTable(dict, $tag_cell, function(item){item.addClass('dictTable')})
+				}
 			}
 	}) 
 }
 
-function createDictTable(dict, parentID, header = null, set_stuff = function(item){}) {
+function createDictTable(dict, parentID, set_stuff = function(item){}) {
     var property;
 //    $(parentID).append('<table>')
 //    var $table = $(parentID + ' table')
     $table = $('<table>').appendTo($(parentID))
     set_stuff($table)
-    if (header != null) {
-        $row = $('<tr>').appendTo($table); set_stuff($row);
-        $cell = $('<th colspan="2">').appendTo($row); set_stuff($cell);
-        $cell.html(header)
-    }
     for (property in dict) {
         $row = $('<tr>').appendTo($table)
         set_stuff($row)
@@ -75,8 +76,6 @@ function onParse() {
 	}
 
 	if(errors.length > 0) {
-//		console.log("Errors\n")
-//		console.log(errors.join('\n'))
 		alert("Errors in grammar!")
 		result.error_list.length = 0
 		return
@@ -84,9 +83,17 @@ function onParse() {
 	
 	word_list = []
 	//fetch dicts, jsonify and send them
-	$('#' + tag_table_id).find('table.dictTable').each(function() {
-		dict = fetchDictTable(this, "form")
-		word_list.push([dict])  //here we should send [dict], to account for homonymy
+	$('#' + tag_table_id).find('table.wordTable').each(function() {
+		//first row word form, next rows pos tag
+		form = $(this).find('th').text()
+		tags = []
+		$(this).find('td table.dictTable').each(function() {
+			dict = fetchDictTable(this)
+			dict.form = form
+			tags.push(dict)
+			
+		})
+		word_list.push(tags)  //here we should send [dict], to account for homonymy
 	})
 
 	obj = {'grammar': grammar_list, 'word_list':word_list}
@@ -98,19 +105,23 @@ function onParse() {
 		alert('No tagged word list!')
 		return
 	}
-	$.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)            
+	//$.post("http://localhost:8000/cyk", JSON.stringify(obj), processParse)    //TO DO: process bad!
+	$.ajax('http://localhost:8000/cyk', {
+		type: 'POST',  // http method
+		data: JSON.stringify(obj),  // data to submit
+		success: processParse,
+		error: function (jqXhr, textStatus, errorMessage) {
+			alert('Error: ' + errorMessage)	
+    	}
+	});         
 }
 
-function fetchDictTable(tableID, header_property) {
+function fetchDictTable(tableID) {
     var dict = new Object();
     $(tableID).children("tr").each(function(index) {
-        if($(this).find("th").length > 0) { //header
-            dict[header_property] = $(this).find("th").text()
-        } else {
-            property = $(this).find("td input[name='k']").val()
-            value = $(this).find("td input[name='v']").val()
-            dict[property] = value
-        }
+        property = $(this).find("td input[name='k']").val()
+		value = $(this).find("td input[name='v']").val()
+		dict[property] = value
     });   
     return dict;
 }

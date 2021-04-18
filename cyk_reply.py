@@ -11,10 +11,13 @@ from cyk import CYK_Parser
 def get_cyk_parse(req_dict: dict) -> str:
     # I expect 2 k,v pairs: 'grammar': result, 'word_list':word_list
     if 'grammar' not in req_dict or 'word_list' not in req_dict:
-        return 'Error, bad input'
+        return 'Error, input does not contain grammar or word_list'
 
-    word_list = req_dict['word_list'] 
-    m_list = [[Monomial(d) for d in item] if isinstance(item, list) else Monomial(item) for item in word_list]
+    word_list = req_dict['word_list']
+    try:
+        m_list = [[Monomial(d) for d in item] if isinstance(item, list) else Monomial(item) for item in word_list]
+    except Exception as ex:
+        return str(ex)
     grammar = Grammar()
     rule_list = req_dict['grammar'] # a list of objects with attributes 'rule', 'weight' 
     for obj in rule_list:

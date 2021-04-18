@@ -66,5 +66,13 @@ def sequence_to_dicts(sequence:str) -> List[List[Dict]]:
 def generate_homonyms(tag : dict) -> List[Dict]:
     homonyms = [tag]
     # vorbesc : 1st sg, 3rd pl.
-    # if tag[nodes.Monomial.CATEGORY] == 'V' and tag[nodes.Monomial.FORM].endswith('esc'):    
+    if tag[nodes.Monomial.CATEGORY] == 'V' and tag[nodes.Monomial.FORM].endswith('esc') and 'pers' in tag and 'nr' in tag:
+        tag2 = tag.copy()
+        if tag['pers'] == '1':
+            tag2['pers'] = '3'
+            tag2['nr'] = 'pl'
+        else:
+            tag2['pers'] = '1'
+            tag2['nr'] = 'sg'
+        homonyms.append(tag2)
     return homonyms

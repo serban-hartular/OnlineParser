@@ -3,72 +3,12 @@
 
 <head>
     <title>Toy Grammar</title>
-    <link rel="stylesheet" href="css/stylesheet.css">
-    <link rel="icon" type="image/png" href="img/favicon.png"/>
+    <link rel="stylesheet" href= {{ url_for('static', filename = 'styles/stylesheet.css') }}>
+    <link rel="icon" type="image/png" href={{ url_for('static', filename = 'img/favicon.png') }} />
     <meta charset="utf-8">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src='scripts/rule_parser.js'></script>
-    <script src="scripts/page_manager.js"></script>
-    <script>
-        
-        var tag_table_id = "tag_table"
-        function sendText() {
-            text = document.getElementById("sequence_input").value
-            $.get("http://localhost:8080/?q=" + encodeURIComponent(text),
-                  function(data, status) {
-                    var list
-                    try {
-                        list = JSON.parse(data)
-                    }
-                    catch {
-                        console.log('error json parsing \"' + data + '\"')
-                        return
-                    }
-                    
-                    $('#' + tag_table_id).remove() // remove tag table
-                    var $tag_table = $(`<table id=${ tag_table_id }><tr>`).appendTo($('#tagger_div'))
-                    for(i = 0; i < list.length; i++) {
-                        $cell = $('<td>').appendTo($tag_table)
-                        var dict = list[i]
-                        header = dict['form']
-                        delete dict.form
-                        createDictTable(dict, $cell, header, function(item){item.addClass('dictTable')})
-                    }
-            })
-          
-        }
-        
-        function onParse() {
-            grammar_str = $('#grammar_textarea').val()
-            if(grammar_str.charAt(grammar_str.length-1) != '\n')
-                grammar_str = grammar_str + '\n'
-            
-            result = rule_parser.parse(grammar_str)
-            grammar = result.rule_list
-            errors = result.error_list
-            if(errors.length > 0) {
-                console.log("Errors\n")
-                console.log(errors.join('\n'))
-                result.error_list.length = 0
-                return
-            }
-            
-            word_list = []
-            //fetch dicts, jsonify and send them
-            $('#' + tag_table_id).find('table.dictTable').each(function() {
-                dict = fetchDictTable(this, "form")
-                word_list.push(dict)
-            })
-
-            obj = {'grammar': grammar, 'word_list':word_list}
-            if(grammar.length == 0 || word_list.length == 0) {
-                console.log('No grammar, or no word_list')
-                return
-            }
-            $.post("http://localhost:8000/cgi-bin/reply.py", JSON.stringify(obj), processParse)
-        }
-    </script>
-    
+    <script src={{ url_for('static', filename = 'rule_parser.js') }}></script>
+    <script src={{ url_for('static', filename = 'page_manager.js') }}></script>
 </head>
 
 <body>
@@ -83,13 +23,44 @@
 <br/><br/>
 <div id="tagger_div">
     <label><h3>Analiză morfologică</h3></label><br/>
-</div>    
+</div>
 <br/>
-<div id="grammar_edit_div">
-    <label><h3>Gramatică - Reguli</h3></label>
-    <button id="grammar_view_toggle" onclick="$('#grammar_textarea').toggle()">Afișare/Ascundere</button>
+<div> <!-- grammar div -->
+    <p>
+        <label><h3>Gramatică - Reguli</h3></label>
+        <button id="grammar_view_toggle" onclick="$('#grammar_edit_div').toggle()">Afișare/Ascundere</button>
+    </p>
     <br/>
-    <textarea id="grammar_textarea" rows="10" cols="90">
+    <div  id="grammar_edit_div">
+        <p>
+            <button id="grammar_text_table_toggle" onclick="toggleGrammarTableText()">Tabel/Text simplu</button>
+        </p>
+        <div id="grammar_table_div" style="display: none;">
+            <table><tr>
+                <td>Filtru</td>
+                <td><input id="filter" oninput="onFilterInput(event)"></input/></td>
+                <td><button onclick="addNewRule(event)">Regulă nouă</button></td>
+            </tr></table>
+            <table id="rule_table" class="editable_table">
+                <tr>
+                    <th class="editable_rule">Regula</th>
+                    <th class="editable_score">Scor</th>
+                    <th class="delete_cell"></th>
+                </tr>
+                <tr  class="rule_row">
+                    <td class="editable_rule" contenteditable="true">NP[head=noun pers~3] -> noun:N</td>
+                    <td class="editable_score" contenteditable="true">N/A</td>
+                    <td class="delete_cell" onclick="deleteRule(event)">x</td>
+                </tr>
+                <tr style="display: none;"> <!-- the row to clone -->
+                    <td class="editable_rule" contenteditable="true">undefined</td>
+                    <td class="editable_score" contenteditable="true">N/A</td>
+                    <td class="delete_cell" onclick="deleteRule(event)">x</td>
+                </tr>
+            </table>
+        </div>
+        <!-- textarea id="grammar_textarea" rows="10" cols="90" style="display: none;" -->
+            <textarea id="grammar_textarea" rows="10" cols="90">
 NumP[num=sg head=n] -> det:Det[Type=possessive gen=@ nr=@],  n:Num[Type=ordinal]
 NumP[num=sg head=n] -> n:Num[Type=ordinal! Definiteness=yes]
 NumP[head=n] ->  n:Num[Type=cardinal]
@@ -117,10 +88,11 @@ VP += adv*:Adv
 SP[head=vp] -> part:Part[Type=Subj! pos=0!] , vp:VP[mod=Subj]
 VP += dobj:SP
     </textarea>
+    </div>
 </div>
 <br/>
 <div id="parse_div">
-     <button id="parse_button" onclick="onParse()">Analiză Sintactică</button>
+    <button id="parse_button" onclick="onParse()">Analiză Sintactică</button>
 </div>
 <br/><br/>
 <div id="cyk_table_div">
@@ -132,5 +104,12 @@ VP += dobj:SP
     <br/>
 </div>
 <div id='tree_div_bottom'><br/></div>
+
+<script>
+    $('.editable_rule').on('keydown focusout', finishedEditingLine)
+    $('.editable_score').on('keydown focusout', finishedEditingLine)
+    toggleGrammarTableText()
+</script>
+
 </body>
 </html>
