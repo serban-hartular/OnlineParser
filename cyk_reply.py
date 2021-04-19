@@ -27,6 +27,8 @@ def get_cyk_parse(req_dict: dict) -> str:
             grammar.add_rule(rule_from_string(rule_str))
         except Exception as ex:
             return str(ex)
+    print(m_list)
+    print(grammar)
     cyk = CYK_Parser(m_list, grammar)
     cyk.parse()
 

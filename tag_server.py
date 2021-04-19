@@ -24,7 +24,7 @@ ro_cube=Cube(verbose=True)         # initialize it
 ro_cube.load("ro")                 # select the desired language (it will auto-download the model on first run)
 
 def process_input(sequence:str) -> str:
-    print(json.dumps(sequence_to_dicts(sequence)))
+    # print(json.dumps(sequence_to_dicts(sequence)))
     return json.dumps(sequence_to_dicts(sequence))
 
 FORM = 'form'

@@ -19,9 +19,9 @@ function sendText() {
 			
 			$('#' + tag_table_id).remove() // remove tag table
 			var $tag_table = $(`<table id=${ tag_table_id }>`).appendTo($('#tagger_div'))
-			var $tag_row = $('<tr id="only">').appendTo($tag_table)
+			var $tag_row = $('<tr>').appendTo($tag_table)
 			for(i = 0; i < list.length; i++) {
-				$word_cell = $('<table class="wordTable">').appendTo($('<td>').appendTo($tag_row))
+				$word_cell = $('<table class="wordTable">').appendTo($('<td class="wordTable">').appendTo($tag_row))
 				//cell will have a table: first row word form, following rows one for each morpho. analysis
 				var homonyms = list[i]
 				$word_cell.append(`<tr><th class="dictWrapper">${ homonyms[0]['form'] }</th></tr>`)
@@ -146,6 +146,21 @@ function processParse(data, status, table_class='cyk_table_class') {
     $("#cyk_table").remove()
     generateCYKTable(parse_table, $('#cyk_table_div'))
     $('#tree_div_bottom')[0].scrollIntoView(false)
+    
+    //click on likeliest parse
+    done = false
+    for(row = parse_table.length-1; row >= 0; row--) {
+    	for(col = 0; col < parse_table[row].length; col++) {
+    		for(i = 0; i < parse_table[row][col].length; i++) {
+    			num = parse_table[row][col][i]
+    			onParseLabelClick(num)
+    			done = true
+    			break
+    		}
+	    	if(done) break
+    	}
+    	if(done) break
+    }
 }
 
 
@@ -196,7 +211,7 @@ function generateNodeEntry(node, deprel) {
 	$e.append(`<b>${ node['CAT'] }</b>`)
 	string = '[ '
 	for(property in node) {
-        if(!['children', 'CAT', 'form', 'pos', 'index'].includes(property)) {
+        if(!['children', 'CAT', 'form' /*, 'pos', 'index'*/ ].includes(property)) {
             string += `${ property }=${ node[property ]} `;
         }
     }
@@ -206,14 +221,15 @@ function generateNodeEntry(node, deprel) {
 }
 
 
-function generateTreeView(node_index, $parent, deprel = '') {
+function generateTreeView(node_index, $parent, deprel = '', fold_children = true) {
     let node = node_dict[node_index]
     let $li = $('<li>').appendTo($parent)
 //    let l_text = deprel + (deprel != '' ? ': ' : '') + node2str(node)
     if(node['children'].length == 0) {
 //        $li.text(l_text)
+		$li.append('<button>○</button>')
 		$li.append(generateNodeEntry(node, deprel))
-	 } else {
+	} else {
         $li.append(`<button>-</button>`); //  <span class="caret">${ l_text }</span>`)
         $li.children('button').click(function() { 
         	$(this).parent().find('ul,li').toggle();
@@ -231,6 +247,11 @@ function generateTreeView(node_index, $parent, deprel = '') {
             i++
             generateTreeView(child_index, $child_list, child_deprel)
         }
+    }
+    if(fold_children) {
+		$li.children('ul').each(function() {
+			$li.find('li button').each(function() { $(this).click() })
+		})
     }
     return $li
 }
@@ -338,5 +359,24 @@ function toggleGrammarTableText(toggle_visibility = true) {
 		//$table.toggle()
 		$('#grammar_table_div').toggle() //#grammar_table_div'
 		$textarea.toggle()
+		str1 = 'Format text'
+		str2 = 'Tabel editabil'
+		if($('#grammar_text_table_toggle').html() == str1) {
+			$('#grammar_text_table_toggle').html(str2)
+		} else {
+			$('#grammar_text_table_toggle').html(str1)		
+		}
 	}
+}
+
+function showHideGrammar() {
+    $('#grammar_edit_div').toggle()
+    str1 = 'Vezi/Editează Gramatică'
+    str2 = 'Ascunde Gramatică'
+    //console.log($('#grammar_view_toggle').html())
+    if($('#grammar_view_toggle').html() == str2) {
+    	 $('#grammar_view_toggle').html(str1)
+    } else {
+	    $('#grammar_view_toggle').html(str2)
+    }
 }

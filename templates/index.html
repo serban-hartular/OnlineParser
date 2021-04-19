@@ -27,13 +27,12 @@
 <br/>
 <div> <!-- grammar div -->
     <p>
-        <label><h3>Gramatică - Reguli</h3></label>
-        <button id="grammar_view_toggle" onclick="$('#grammar_edit_div').toggle()">Afișare/Ascundere</button>
+        <!-- label><h3>Gramatică - Reguli</h3></label -->
+        <button id="grammar_view_toggle" onclick="showHideGrammar()" class="hide_grammar_button">Ascunde Gramatică</button>
     </p>
-    <br/>
     <div  id="grammar_edit_div">
         <p>
-            <button id="grammar_text_table_toggle" onclick="toggleGrammarTableText()">Tabel/Text simplu</button>
+            Reguli Gramatică <button id="grammar_text_table_toggle" onclick="toggleGrammarTableText()">Format text</button>
         </p>
         <div id="grammar_table_div" style="display: none;">
             <table><tr>
@@ -96,7 +95,7 @@ VP += dobj:SP
 </div>
 <br/><br/>
 <div id="cyk_table_div">
-    <label><h3>Tabel Analiză CYK</h3></label>
+    <label><h3>Tabel CYK<br/>(Analize alternative și parțiale)</h3></label>
 </div>
 <br/><br/>
 <div id="tree_div">
@@ -109,6 +108,7 @@ VP += dobj:SP
     $('.editable_rule').on('keydown focusout', finishedEditingLine)
     $('.editable_score').on('keydown focusout', finishedEditingLine)
     toggleGrammarTableText()
+    showHideGrammar()
 </script>
 
 </body>
